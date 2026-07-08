@@ -11,9 +11,10 @@ export const config = {
   anthropicBaseUrl: (process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com").replace(/\/+$/, ""),
   llmModel: process.env.LLM_MODEL || "claude-sonnet-4-6",
 
-  // 3D（Tripo，image→model；待用户提供 key，缺则留桩）
+  // 3D（Tripo，image→model）
   tripoApiKey: process.env.TRIPO_API_KEY || "",
   tripoBaseUrl: (process.env.TRIPO_BASE_URL || "https://api.tripo3d.ai").replace(/\/+$/, ""),
+  tripoModelVersion: process.env.TRIPO_MODEL_VERSION || "", // 空=Tripo 默认(v2.5)；可设 v3.1-20260211 等
 
   // MOCK=1：不联网，返回占位（离线跑通 UI）
   mock: process.env.MOCK === "1",
