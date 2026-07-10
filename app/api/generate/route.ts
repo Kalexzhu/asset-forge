@@ -16,6 +16,15 @@ async function toB64(image: string): Promise<string> {
 
 // 后台执行：逐张完成→存进共享画廊(按 画风+参考图 归档)→任务里只存 URL。
 // 刷新/重连不丢；pm2 重启后历史仍在。
+
+// 内置建模原画规格（沿用 WHEEL object_sheet）：一张图内 正/背/左/右 四正交视角
+// + 顶视 + 3/4 透视，同一物体统一比例，纯白背景无阴影无环境。每条生图必带。
+const MODEL_SHEET_SPEC =
+  "Multi-view reference sheet of the SAME single object on one sheet: " +
+  "four orthographic views — front, back, left, right — plus a top view and one 3/4 perspective hero view, " +
+  "identical object, same design and colors, consistent scale, evenly arranged, " +
+  "pure white background, no shadow, no ground, no environment. Modeling reference sheet for 3D.";
+
 async function runJob(job: Job, ref?: RefImage) {
   try {
     const subs = await expandDescriptions(job.description, job.style, job.count);
@@ -24,7 +33,7 @@ async function runJob(job: Job, ref?: RefImage) {
 
     await Promise.all(
       subs.map(async (sub, i) => {
-        const fullPrompt = [job.style, sub].filter(Boolean).join("\n");
+        const fullPrompt = [job.style, sub, MODEL_SHEET_SPEC].filter(Boolean).join("\n");
         try {
           const image = await generateImage(fullPrompt, { ref: job.useRef ? ref : undefined });
           const saved = saveImageToGallery(job.style, job.useRef ? ref?.b64 : undefined, await toB64(image));
