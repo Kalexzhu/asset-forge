@@ -33,11 +33,21 @@ export async function extractStyle(images: { b64: string; mime: string }[]): Pro
   content.push({
     type: "text",
     text:
-      "你是资深美术总监。看这些参考图，写一段【英文】可复用的画风提示词（30-70词），" +
-      "抓住：渲染方式(扁平/渲染)、描边、上色/阴影、配色、细节密度、视角/构图。" +
-      "只描述【画风】，不描述具体内容。只输出这段提示词本身，不要任何前后缀。",
+      "你是资深美术总监，为 AI 图像模型（偏爱光泽渲染与堆细节，需用强正面词压制）提炼可复用画风提示词。\n" +
+      "看参考图，输出一段【英文】画风提示词（50-90词），必须逐项覆盖以下轴，每轴用强而具体的正面词：\n" +
+      "①渲染方式：明确判定是 flat matte 平涂 / cel-shading(平涂+硬边two-tone阴影) / painterly / glossy 3D render，选中的要用力写死（如 solid flat matte color fills, clean two-tone cel shading）\n" +
+      "②光照：平光高明度(even flat bright high-key) 还是 戏剧光，写明\n" +
+      "③描边：有无、粗细、性质（crisp clean outlines / sketchy / none）\n" +
+      "④配色：具体色名 + 饱和度与明度（如 bright light airy palette: teal, mint, coral, warm yellow）\n" +
+      "⑤细节密度与造型：simple chunky low-detail 还是 ornate intricate，留白程度\n" +
+      "⑥视角构图：isometric/平视/俯视等\n" +
+      "⑦背景：纯色？什么色？（如 solid flat light warm apricot background）\n" +
+      "规则：只用正面描述词（禁止 no/not/avoid 这类否定式）；只描述画风，不描述图中具体内容。\n" +
+      "输出格式与颗粒度参考这个范例（这是别的画风，勿照抄内容，学它的写法密度）：\n" +
+      "\"flat 2D vector cartoon isometric casual mobile game illustration, solid flat matte color fills, simple clean two-tone cel shading, even flat bright high-key lighting, bright light airy cheerful palette (teal, mint green, coral pink, warm yellow), simple chunky low-detail stylized shapes with clean crisp edges, thin clean outlines, solid flat light warm apricot background, tidy geometric readable composition\"\n" +
+      "只输出提示词本身，不要任何前后缀。",
   });
-  return callClaude(content, 512);
+  return callClaude(content, 1024);
 }
 
 // 描述 + 锁定画风 → N 个发散子描述（只写"画什么"，不写画风）
