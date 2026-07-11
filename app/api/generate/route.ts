@@ -20,10 +20,9 @@ async function toB64(image: string): Promise<string> {
 // 内置建模原画规格（沿用 WHEEL object_sheet）：一张图内 正/背/左/右 四正交视角
 // + 顶视 + 3/4 透视，同一物体统一比例，纯白背景无阴影无环境。每条生图必带。
 const MODEL_SHEET_SPEC =
-  "Multi-view reference sheet of the SAME single object on one sheet: " +
-  "four orthographic views — front, back, left, right — plus a top view and one 3/4 perspective hero view, " +
-  "identical object, same design and colors, consistent scale, evenly arranged, " +
-  "pure white background, no shadow, no ground, no environment. Modeling reference sheet for 3D.";
+  "同一个物体的多视图设定图，排在同一张图内：正面、背面、左侧、右侧四个正交视角，" +
+  "外加一个顶视图和一个四分之三透视展示图；六个视图必须是同一个物体、同一套设计与配色、统一比例、整齐排列；" +
+  "纯白色背景，画面中只有该物体本身（3D 建模参考原画）。";
 
 async function runJob(job: Job, ref?: RefImage) {
   try {
