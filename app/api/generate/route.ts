@@ -26,15 +26,24 @@ const MODEL_SHEET_SPEC =
 
 async function runJob(job: Job, ref?: RefImage) {
   try {
-    const subs = await expandDescriptions(job.description, job.style, job.count);
+    // 抽卡模式：描述原样 ×N（纯随机差异）；发散模式：LLM 扩 N 个变体
+    const subs =
+      job.mode === "gacha"
+        ? Array.from({ length: job.count }, () => job.description)
+        : await expandDescriptions(job.description, job.style, job.count);
     job.results = subs.map((p) => ({ prompt: p, done: false }));
     saveJob(job);
 
     await Promise.all(
       subs.map(async (sub, i) => {
-        const fullPrompt = [job.style, sub, MODEL_SHEET_SPEC].filter(Boolean).join("\n");
+        const fullPrompt = [job.style, sub, job.sheet !== false ? MODEL_SHEET_SPEC : ""]
+          .filter(Boolean)
+          .join("\n");
         try {
-          const image = await generateImage(fullPrompt, { ref: job.useRef ? ref : undefined });
+          const image = await generateImage(fullPrompt, {
+            ref: job.useRef ? ref : undefined,
+            size: job.size,
+          });
           const saved = saveImageToGallery(job.style, job.useRef ? ref?.b64 : undefined, await toB64(image));
           job.results[i] = { prompt: sub, image: saved.url, ok: true, done: true };
         } catch (e) {
@@ -55,10 +64,11 @@ async function runJob(job: Job, ref?: RefImage) {
 // POST：创建任务，立刻返回 jobId（不等出图）
 export async function POST(req: NextRequest) {
   try {
-    const { description, style, count, refB64, refMime } = await req.json();
+    const { description, style, count, refB64, refMime, mode, sheet, size } = await req.json();
     if (!description?.trim()) return NextResponse.json({ error: "描述不能为空" }, { status: 400 });
     const n = Math.max(1, Math.min(12, Number(count) || 4));
     const ref: RefImage | undefined = refB64 ? { b64: refB64, mime: refMime || "image/png" } : undefined;
+    const SIZES = ["1024x1024", "1536x1024", "1024x1536"];
 
     const job: Job = {
       id: newJobId(),
@@ -67,6 +77,9 @@ export async function POST(req: NextRequest) {
       style: (style || "").trim(),
       count: n,
       useRef: !!ref,
+      mode: mode === "gacha" ? "gacha" : "diverge",
+      sheet: sheet !== false,
+      size: SIZES.includes(size) ? size : "1024x1024",
       status: "running",
       results: [],
     };

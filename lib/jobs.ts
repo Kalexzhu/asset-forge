@@ -19,6 +19,9 @@ export type Job = {
   style: string;
   count: number;
   useRef: boolean;
+  mode?: "diverge" | "gacha"; // diverge=LLM发散变体；gacha=同描述抽卡（旧任务缺省视为 diverge）
+  sheet?: boolean; // 是否附加建模原画规格（多视图+白底）
+  size?: string; // 出图尺寸，如 1024x1024 / 1536x1024
   status: "running" | "done" | "interrupted";
   results: JobResult[];
 };
